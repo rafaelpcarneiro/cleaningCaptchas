@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image, ImageFilter
 import time
 
-dx, dy = 7, 7
+dx, dy = 9, 9
 
 def makeImageBinary(img):
 	return 255 * (img >= 255/2)
@@ -118,23 +118,23 @@ if __name__ == '__main__':
 
 	# Loading parameters
 	pixel_is_part_of_word = \
-		np.loadtxt('parameters/pixel_is_a_word.txt', \
+		np.loadtxt('parameters_9x9/pixel_is_a_word.txt', \
 					delimiter=';')
 
 	neighborhood_given_word_param_x = \
-		np.loadtxt('parameters/neighborhood_given_word_param_x.txt', \
+		np.loadtxt('parameters_9x9/neighborhood_given_word_param_x.txt', \
 					delimiter=';')
 
 	neighborhood_given_word_param_total = \
-		np.loadtxt('parameters/neighborhood_given_word_param_total.txt', \
+		np.loadtxt('parameters_9x9/neighborhood_given_word_param_total.txt', \
 					delimiter=';')
 
 	neighborhood_given_not_word_param_x = \
-		np.loadtxt('parameters/neighborhood_given_not_word_param_x.txt', \
+		np.loadtxt('parameters_9x9/neighborhood_given_not_word_param_x.txt', \
 					delimiter=';')
 
 	neighborhood_given_not_word_param_total = \
-		np.loadtxt('parameters/neighborhood_given_not_word_param_total.txt', \
+		np.loadtxt('parameters_9x9/neighborhood_given_not_word_param_total.txt', \
 					delimiter=';')
 
 	# Cleaning Images
