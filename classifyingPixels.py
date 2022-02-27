@@ -107,7 +107,7 @@ import time
 from PIL import Image
 
 # constants
-dx, dy = 9, 9
+dx, dy = 7, 7
 
 dx_checkBox, dy_checkBox = 3, 3
 
@@ -237,7 +237,7 @@ if __name__ == "__main__":
 	neighborhood_given_not_word['total'] += neighborhood_given_not_word['total']
 	
 
-	for iteration in range(100):
+	for iteration in range(10):
 		for file in trainingSampleFiles:
 			time.sleep(1)
 

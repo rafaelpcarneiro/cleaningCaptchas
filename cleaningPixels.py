@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image, ImageFilter
 import time
 
-dx, dy = 9, 9
+dx, dy = 7, 7
 
 def makeImageBinary(img):
 	return 255 * (img >= 255/2)
@@ -151,11 +151,11 @@ if __name__ == '__main__':
 
 		img_array2 = img_array.copy()
 
-		img_array2[:dx, :]                        = 255
-		img_array2[(img_array.shape[0] - dx):, :] = 255
+		#img_array2[:dx, :]                        = 255
+		#img_array2[(img_array.shape[0] - dx):, :] = 255
 
-		img_array2[:, :dy]                        = 255
-		img_array2[:, (img_array.shape[1] - dy):] = 255
+		#img_array2[:, :dy]                        = 255
+		#img_array2[:, (img_array.shape[1] - dy):] = 255
 
 		for x in range(dx, img_array.shape[0] - dx):
 			for y in range(dy, img_array.shape[1] - dy):
@@ -203,8 +203,9 @@ if __name__ == '__main__':
 					# Calculating the classifier for each pixel
 					K = 1 / (prob_is_a_word + prob_not_a_word)
 
-					img_array2[x,y] = 255 if prob_not_a_word * K >= 0.95 else 0
-					print( prob_not_a_word * K)
+					#img_array2[x,y] = 255 if prob_not_a_word * K >= 0.98 else 0
+					img_array2[x,y] = 255 if prob_is_a_word * K <= 0.05 else 0
+					#print( prob_not_a_word * K)
 
 
 		print ('Image ' + file + ' --> DONE')
