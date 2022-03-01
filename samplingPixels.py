@@ -230,10 +230,12 @@ def d0(img, pos_x, pos_y):
 # from the position (pos_x, pos_y)
 def d45(img, pos_x, pos_y):
 	step = 0
-	pos_y  += 1, pos_x -= 1
+	pos_y  += 1
+	pos_x -= 1
 	while (pos_y < img.shape[1]) and (pos_x >= 0) and (img[pos_x, pos_y] == 0):
 		step   += 1
-		pos_y  += 1, pos_x -= 1
+		pos_y  += 1
+		pos_x -= 1
 	
 	return step
 
@@ -252,10 +254,12 @@ def d90(img, pos_x, pos_y):
 # from the position (pos_x, pos_y)
 def d135(img, pos_x, pos_y):
 	step = 0
-	pos_x -= 1, pos_y -= 1
+	pos_x -= 1
+	pos_y -= 1
 	while (pos_x >= 0) and (pos_y >= 0) and (img[pos_x, pos_y] == 0):
 		step  += 1
-		pos_x -= 1, pos_y -= 1
+		pos_x -= 1
+		pos_y -= 1
 	
 	return step
 
@@ -274,10 +278,12 @@ def d180(img, pos_x, pos_y):
 # from the position (pos_x, pos_y)
 def d225(img, pos_x, pos_y):
 	step = 0
-	pos_x += 1, pos_y -= 1
+	pos_x += 1
+	pos_y -= 1
 	while (pos_x < img.shape[0]) and (pos_y >= 0) and (img[pos_x, pos_y] == 0):
 		step  += 1
-		pos_x += 1, pos_y -= 1
+		pos_x += 1
+		pos_y -= 1
 	
 	return step
 
@@ -296,10 +302,12 @@ def d270(img, pos_x, pos_y):
 # from the position (pos_x, pos_y)
 def d315(img, pos_x, pos_y):
 	step = 0
-	pos_x += 1, pos_y += 1
+	pos_x += 1
+	pos_y += 1
 	while (pos_x < img.shape[0]) and (pos_y < img.shape[1])  and (img[pos_x, pos_y] == 0):
 		step  += 1
-		pos_x += 1, pos_y += 1
+		pos_x += 1
+		pos_y += 1
 	
 	return step
 
@@ -473,6 +481,25 @@ if __name__ == "__main__":
 	
 	sampleFile = open('sample.txt', 'a')
 
+	features = (
+		'#pos_x;'        
+		' pos_y;'        
+		' d0;'           
+		' d45;'           
+		' d90;'           
+		' d135;'          
+		' d180;'          
+		' d225;'          
+		' d270;'          
+		' d315;'         
+		' max_ball;'     
+		' whites_rect0;' 
+		' whites_rect1;' 
+		' whites_rect2;' 
+		' target\n')
+
+	sampleFile.write(features)
+
 	for iteration in range(10):
 		for file in trainingSampleFiles:
 			time.sleep(1)
@@ -500,46 +527,30 @@ if __name__ == "__main__":
 			x = dx + pos_black_pixels[0, random_val]
 			y = dy + pos_black_pixels[1, random_val]
 
-			features = (
-				'pos_x;'        
-				'pos_y;'        
-				'd0;'           
-				'd45;'           
-				'd90;'           
-				'd135;'          
-				'd180;'          
-				'd225;'          
-				'd270;'          
-				'd315;'         
-				'max_ball;'     
-				'whites_rect0;' 
-				'whites_rect1;' 
-				'whites_rect2;' 
-				'target')
 
-			sample = np.array( [x,                             \
-								y,                             \
-								d0(img_array, x, y)),          \
-								d45(img_array, x, y)),         \
-								d90(img_array, x, y)),         \
-								d180(img_array, x, y)),        \
-								d225(img_array, x, y)),        \
-								d275(img_array, x, y)),        \
-								d315(img_array, x, y)),        \
-								max_ball(img_array, x, y),     \
-								whites_rect0(img_array, x, y), \
-								whites_rect1(img_array, x, y), \
-								whites_rect2(img_array, x, y), \
+			sample = np.array( [x,                            
+								y,                            
+								d0(img_array, x, y),          
+								d45(img_array, x, y),         
+								d90(img_array, x, y),         
+								d180(img_array, x, y),        
+								d225(img_array, x, y),        
+								d270(img_array, x, y),        
+								d315(img_array, x, y),        
+								max_ball(img_array, x, y),    
+								whites_rect0(img_array, x, y),
+								whites_rect1(img_array, x, y),
+								whites_rect2(img_array, x, y),
 								0])
 
 
 			# Print the check Box
-			img_array2[(x - dx_checkBox):(x + dx_checkBox + 1), \
-					   (y - dy_checkBox):(y + dy_checkBox + 1), \
+			img_array2[(x - dx_checkBox):(x + dx_checkBox + 1), 
+					   (y - dy_checkBox):(y + dy_checkBox + 1), 
 					   0] = 255
 
-			img_array2[(x - dx_checkBox):(x + dx_checkBox + 1), \
-					   (y - dy_checkBox):(y + dy_checkBox + 1), \
+			img_array2[(x - dx_checkBox):(x + dx_checkBox + 1), 
+					   (y - dy_checkBox):(y + dy_checkBox + 1), 
 					   (1,2)] = 0
 
 			img_array2[x,y,:] = 0
@@ -555,11 +566,11 @@ if __name__ == "__main__":
 
 			# Saving the sample
 
-			features_fmt = '%d;' * 11 + "%.2f;" * 3 + "%d"
-			np.savetxt(sampleFile, \
-						sample, \
-						fmt=features_fmt, \
-						header=features)
+			features_fmt = ['%d'] * 10 + ["%.2f"] * 3 + ["%d"]
+			np.savetxt(sampleFile, 
+						sample.reshape(1, 14), 
+						delimiter=';', 
+						fmt=features_fmt)
 
 		print("iteration = ", iteration)
 	
