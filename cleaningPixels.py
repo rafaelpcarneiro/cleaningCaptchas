@@ -8,152 +8,424 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
 
 dx, dy = 7, 7
+dy_dx = 3
+
+# vector directions (images have the following coordinate system)
+#   0--------->y
+#   |
+#   |
+#   |
+#   V
+#   x
+d0   = np.array([ 0,  1])
+d45  = np.array([-1,  1])
+d90  = np.array([-1,  0])
+d135 = np.array([-1, -1])
+d180 = np.array([ 0, -1])
+d225 = np.array([ 1, -1])
+d270 = np.array([ 1,  0])
+d315 = np.array([ 1,  1])
 
 ### AUXILIARY FUNCTIONS
 #{{{1
 def makeImageBinary(img):
 	return 255 * (img >= 255/2)
 
+def is_pixel_inside_img(img, pixel):
+	return ((0 <= pixel[0] < img.shape[0]) and (0 <= pixel[1] < img.shape[1]))
+
+def is_pixel_black(img, pixel):
+	if is_pixel_inside_img(img, pixel):
+		return (img[pixel[0], pixel[1]] == 0)
+	else:
+		False
+
 # counting how many black pixels on the direction d0 = 1 * (cos 0, sin 0)
-# from the position (pos_x, pos_y)
-def d0(img, pos_x, pos_y):
-	step = 0
-	pos_y  += 1
-	while (pos_y < img.shape[1]) and (img[pos_x, pos_y] == 0):
-		step   += 1
-		pos_y  += 1
+# from the position (pixel[0], pixel_y)
+def d0_direction(img, pixel_at):
+	step  = 0
+	pixel = pixel_at + d0
+	while is_pixel_inside_img(img, pixel) and is_pixel_black(img, pixel):
+		step  += 1
+		pixel = pixel + d0
 	
 	return step
+
+def d0_thickness(img, pixel_at):
+	length  = d0_direction(img, pixel_at)
+
+	pixel   = pixel_at.copy()
+	dir_vec = d0
+	ort_vec = d90
+
+	if length == 0:
+		return 0
+	else:
+		thickness = np.zeros(length + 1)
+
+		for i in range(length + 1):
+			step = 1
+			while is_pixel_inside_img(img, pixel + i * dir_vec + step * ort_vec) and \
+				  is_pixel_black     (img, pixel + i * dir_vec + step * ort_vec):
+
+				  step += 1
+
+			thickness[i] = step - 1
+
+			step = 1
+			while is_pixel_inside_img(img, pixel + i * dir_vec - step * ort_vec) and \
+				  is_pixel_black     (img, pixel + i * dir_vec - step * ort_vec):
+
+				  step += 1
+
+			thickness[i] += step - 1
+
+		return thickness.mean()
+
 
 # counting how many black pixels on the direction d45 = 1 * (cos 45, sin 45)
-# from the position (pos_x, pos_y)
-def d45(img, pos_x, pos_y):
-	step = 0
-	pos_y  += 1
-	pos_x -= 1
-	while (pos_y < img.shape[1]) and (pos_x >= 0) and (img[pos_x, pos_y] == 0):
-		step   += 1
-		pos_y  += 1
-		pos_x -= 1
+# from the position (pixel[0], pixel[1])
+def d45_direction(img, pixel_at):
+	step  = 0
+	pixel = pixel_at + d45
+	while is_pixel_inside_img(img, pixel) and is_pixel_black(img, pixel):
+		step += 1
+		pixel = pixel + d45
 	
 	return step
+
+def d45_thickness(img, pixel_at):
+	length  = d45_direction(img, pixel_at)
+
+	pixel   = pixel_at.copy()
+	dir_vec = d45
+	ort_vec = d135
+
+	if length == 0:
+		return 0
+	else:
+		thickness = np.zeros(length + 1)
+
+		for i in range(length + 1):
+			step = 1
+			while is_pixel_inside_img(img, pixel + i * dir_vec + step * ort_vec) and \
+				  is_pixel_black     (img, pixel + i * dir_vec + step * ort_vec):
+
+				  step += 1
+
+			thickness[i] = step - 1
+
+			step = 1
+			while is_pixel_inside_img(img, pixel + i * dir_vec - step * ort_vec) and \
+				  is_pixel_black     (img, pixel + i * dir_vec - step * ort_vec):
+
+				  step += 1
+
+			thickness[i] += step - 1
+
+		return thickness.mean()
 
 # counting how many black pixels on the direction d90 = 1 * (cos 90, sin 90)
-# from the position (pos_x, pos_y)
-def d90(img, pos_x, pos_y):
+# from the position (pixel[0], pixel[1])
+def d90_direction(img, pixel_at):
 	step = 0
-	pos_x -= 1
-	while (pos_x >= 0) and (img[pos_x, pos_y] == 0):
+	pixel = pixel_at + d90
+	while is_pixel_inside_img(img, pixel) and is_pixel_black(img, pixel):
 		step  += 1
-		pos_x -= 1
+		pixel = pixel + d90
 	
 	return step
+
+def d90_thickness(img, pixel_at):
+	length  = d90_direction(img, pixel_at)
+
+	pixel   = pixel_at.copy()
+	dir_vec = d90
+	ort_vec = d180
+
+	if length == 0:
+		return 0
+	else:
+		thickness = np.zeros(length + 1)
+
+		for i in range(length + 1):
+			step = 1
+			while is_pixel_inside_img(img, pixel + i * dir_vec + step * ort_vec) and \
+				  is_pixel_black     (img, pixel + i * dir_vec + step * ort_vec):
+
+				  step += 1
+
+			thickness[i] = step - 1
+
+			step = 1
+			while is_pixel_inside_img(img, pixel + i * dir_vec - step * ort_vec) and \
+				  is_pixel_black     (img, pixel + i * dir_vec - step * ort_vec):
+
+				  step += 1
+
+			thickness[i] += step - 1
+
+		return thickness.mean()
 
 # counting how many black pixels on the direction d135 = 1 * (cos 135, sin 135)
-# from the position (pos_x, pos_y)
-def d135(img, pos_x, pos_y):
+# from the position (pixel[0], pixel[1])
+def d135_direction(img, pixel_at):
 	step = 0
-	pos_x -= 1
-	pos_y -= 1
-	while (pos_x >= 0) and (pos_y >= 0) and (img[pos_x, pos_y] == 0):
+	pixel = pixel_at + d135
+	while is_pixel_inside_img(img, pixel) and is_pixel_black(img, pixel):
 		step  += 1
-		pos_x -= 1
-		pos_y -= 1
+		pixel = pixel + d135
 	
 	return step
+
+def d135_thickness(img, pixel_at):
+	length  = d135_direction(img, pixel_at)
+
+	pixel   = pixel_at.copy()
+	dir_vec = d135
+	ort_vec = d225
+
+	if length == 0:
+		return 0
+	else:
+		thickness = np.zeros(length + 1)
+
+		for i in range(length + 1):
+			step = 1
+			while is_pixel_inside_img(img, pixel + i * dir_vec + step * ort_vec) and \
+				  is_pixel_black     (img, pixel + i * dir_vec + step * ort_vec):
+
+				  step += 1
+
+			thickness[i] = step - 1
+
+			step = 1
+			while is_pixel_inside_img(img, pixel + i * dir_vec - step * ort_vec) and \
+				  is_pixel_black     (img, pixel + i * dir_vec - step * ort_vec):
+
+				  step += 1
+
+			thickness[i] += step - 1
+
+		return thickness.mean()
 
 # counting how many black pixels on the direction d180 = 1 * (cos 180, sin 180)
-# from the position (pos_x, pos_y)
-def d180(img, pos_x, pos_y):
-	step = 0
-	pos_y -= 1
-	while (pos_y >= 0) and (img[pos_x, pos_y] == 0):
+# from the position (pixel[0], pixel[1])
+def d180_direction(img, pixel_at):
+	step  = 0
+	pixel = pixel_at + d180
+	while is_pixel_inside_img(img, pixel) and is_pixel_black(img, pixel):
 		step  += 1
-		pos_y -= 1
+		pixel = pixel + d180
 	
 	return step
+
+def d180_thickness(img, pixel_at):
+	length  = d180_direction(img, pixel_at)
+
+	pixel   = pixel_at.copy()
+	dir_vec = d180
+	ort_vec = d270
+
+	if length == 0:
+		return 0
+	else:
+		thickness = np.zeros(length + 1)
+
+		for i in range(length + 1):
+			step = 1
+			while is_pixel_inside_img(img, pixel + i * dir_vec + step * ort_vec) and \
+				  is_pixel_black     (img, pixel + i * dir_vec + step * ort_vec):
+
+				  step += 1
+
+			thickness[i] = step - 1
+
+			step = 1
+			while is_pixel_inside_img(img, pixel + i * dir_vec - step * ort_vec) and \
+				  is_pixel_black     (img, pixel + i * dir_vec - step * ort_vec):
+
+				  step += 1
+
+			thickness[i] += step - 1
+
+		return thickness.mean()
 
 # counting how many black pixels on the direction d225 = 1 * (cos 225, sin 225)
-# from the position (pos_x, pos_y)
-def d225(img, pos_x, pos_y):
+# from the position (pixel[0], pixel[1])
+def d225_direction(img, pixel_at):
 	step = 0
-	pos_x += 1
-	pos_y -= 1
-	while (pos_x < img.shape[0]) and (pos_y >= 0) and (img[pos_x, pos_y] == 0):
+	pixel = pixel_at + d225
+	while is_pixel_inside_img(img, pixel) and is_pixel_black(img, pixel):
 		step  += 1
-		pos_x += 1
-		pos_y -= 1
+		pixel = pixel + d225
 	
 	return step
+
+def d225_thickness(img, pixel_at):
+	length  = d225_direction(img, pixel_at)
+
+	pixel   = pixel_at.copy()
+	dir_vec = d225
+	ort_vec = d315
+
+	if length == 0:
+		return 0
+	else:
+		thickness = np.zeros(length + 1)
+
+		for i in range(length + 1):
+			step = 1
+			while is_pixel_inside_img(img, pixel + i * dir_vec + step * ort_vec) and \
+				  is_pixel_black     (img, pixel + i * dir_vec + step * ort_vec):
+
+				  step += 1
+
+			thickness[i] = step - 1
+
+			step = 1
+			while is_pixel_inside_img(img, pixel + i * dir_vec - step * ort_vec) and \
+				  is_pixel_black     (img, pixel + i * dir_vec - step * ort_vec):
+
+				  step += 1
+
+			thickness[i] += step - 1
+
+		return thickness.mean()
 
 # counting how many black pixels on the direction d270 = 1 * (cos 270, sin 270)
-# from the position (pos_x, pos_y)
-def d270(img, pos_x, pos_y):
+# from the position (pixel[0], pixel[1])
+def d270_direction(img, pixel_at):
 	step = 0
-	pos_x += 1
-	while (pos_x < img.shape[0]) and (img[pos_x, pos_y] == 0):
+	pixel = pixel_at + d270
+	while is_pixel_inside_img(img, pixel) and is_pixel_black(img, pixel):
 		step  += 1
-		pos_x += 1
+		pixel = pixel + d270
 	
 	return step
+
+def d270_thickness(img, pixel_at):
+	length  = d270_direction(img, pixel_at)
+
+	pixel   = pixel_at.copy()
+	dir_vec = d270
+	ort_vec = d0
+
+	if length == 0:
+		return 0
+	else:
+		thickness = np.zeros(length + 1)
+
+		for i in range(length + 1):
+			step = 1
+			while is_pixel_inside_img(img, pixel + i * dir_vec + step * ort_vec) and \
+				  is_pixel_black     (img, pixel + i * dir_vec + step * ort_vec):
+
+				  step += 1
+
+			thickness[i] = step - 1
+
+			step = 1
+			while is_pixel_inside_img(img, pixel + i * dir_vec - step * ort_vec) and \
+				  is_pixel_black     (img, pixel + i * dir_vec - step * ort_vec):
+
+				  step += 1
+
+			thickness[i] += step - 1
+
+		return thickness.mean()
 
 # counting how many black pixels on the direction d315 = 1 * (cos 315, sin 315)
-# from the position (pos_x, pos_y)
-def d315(img, pos_x, pos_y):
+# from the position (pixel[0], pixel[1])
+def d315_direction(img, pixel_at):
 	step = 0
-	pos_x += 1
-	pos_y += 1
-	while (pos_x < img.shape[0]) and (pos_y < img.shape[1])  and (img[pos_x, pos_y] == 0):
+	pixel = pixel_at + d315
+	while is_pixel_inside_img(img, pixel) and is_pixel_black(img, pixel):
 		step  += 1
-		pos_x += 1
-		pos_y += 1
+		pixel = pixel + d315
 	
 	return step
 
+def d315_thickness(img, pixel_at):
+	length  = d315_direction(img, pixel_at)
 
-def whites_rect0(img, pos_x, pos_y):
+	pixel   = pixel_at.copy()
+	dir_vec = d315
+	ort_vec = d45
 
-	dy_plus  = d0(img, pos_x, pos_y)
-	dy_minus = d180(img, pos_x, pos_y)
+	if length == 0:
+		return 0
+	else:
+		thickness = np.zeros(length + 1)
 
-	dx_plus  = d270(img, pos_x, pos_y)
-	dx_minus = d90(img, pos_x, pos_y)
+		for i in range(length + 1):
+			step = 1
+			while is_pixel_inside_img(img, pixel + i * dir_vec + step * ort_vec) and \
+				  is_pixel_black     (img, pixel + i * dir_vec + step * ort_vec):
 
-	r0 = 1 * (img[(pos_x - dx_minus) : (dx_plus + pos_x + 1), \
-	              (pos_y - dy_minus) : (dy_plus + pos_y + 1)] == 255)
+				  step += 1
 
-	return r0.sum() / ( (dx_plus + 1 + dx_minus) * (dy_plus + 1 + dy_minus))
+			thickness[i] = step - 1
 
+			step = 1
+			while is_pixel_inside_img(img, pixel + i * dir_vec - step * ort_vec) and \
+				  is_pixel_black     (img, pixel + i * dir_vec - step * ort_vec):
 
-def whites_rect1(img, pos_x, pos_y):
+				  step += 1
 
-	dy_plus  = d45(img, pos_x, pos_y)
-	dy_minus = d45(img, pos_x, pos_y)
+			thickness[i] += step - 1
 
-	dx_plus  = d225(img, pos_x, pos_y)
-	dx_minus = d225(img, pos_x, pos_y)
-
-	r1 = 1 * (img[(pos_x - dx_minus) : (dx_plus + pos_x + 1), \
-	              (pos_y - dy_minus) : (dy_plus + pos_y + 1)] == 255)
-
-	return r1.sum() / ( (dx_plus + 1 + dx_minus) * (dy_plus + 1 + dy_minus))
+		return thickness.mean()
 
 
-def whites_rect2(img, pos_x, pos_y):
-
-	dy_plus  = d135(img, pos_x, pos_y)
-	dy_minus = d135(img, pos_x, pos_y)
-
-	dx_plus  = d315(img, pos_x, pos_y)
-	dx_minus = d315(img, pos_x, pos_y)
-
-	r2 = 1 * (img[(pos_x - dx_minus) : (dx_plus + pos_x + 1), \
-	              (pos_y - dy_minus) : (dy_plus + pos_y + 1)] == 255)
-
-	return r2.sum() / ((dx_plus + 1 + dx_minus) * (dy_plus + 1 + dy_minus))
-
+## So far these whites_rect measures have shown to be useless
+# {{{2
+###def whites_rect0(img, pos_x, pos_y):
+###
+###	dy_plus  = d0(img, pos_x, pos_y)
+###	dy_minus = d180(img, pos_x, pos_y)
+###
+###	dx_plus  = d270(img, pos_x, pos_y)
+###	dx_minus = d90(img, pos_x, pos_y)
+###
+###	r0 = 1 * (img[(pos_x - dx_minus) : (dx_plus + pos_x + 1), \
+###	              (pos_y - dy_minus) : (dy_plus + pos_y + 1)] == 255)
+###
+###	return r0.sum() / ( (dx_plus + 1 + dx_minus) * (dy_plus + 1 + dy_minus))
+###
+###
+###def whites_rect1(img, pos_x, pos_y):
+###
+###	dy_plus  = d45(img, pos_x, pos_y)
+###	dy_minus = d45(img, pos_x, pos_y)
+###
+###	dx_plus  = d225(img, pos_x, pos_y)
+###	dx_minus = d225(img, pos_x, pos_y)
+###
+###	r1 = 1 * (img[(pos_x - dx_minus) : (dx_plus + pos_x + 1), \
+###	              (pos_y - dy_minus) : (dy_plus + pos_y + 1)] == 255)
+###
+###	return r1.sum() / ( (dx_plus + 1 + dx_minus) * (dy_plus + 1 + dy_minus))
+###
+###
+###def whites_rect2(img, pos_x, pos_y):
+###
+###	dy_plus  = d135(img, pos_x, pos_y)
+###	dy_minus = d135(img, pos_x, pos_y)
+###
+###	dx_plus  = d315(img, pos_x, pos_y)
+###	dx_minus = d315(img, pos_x, pos_y)
+###
+###	r2 = 1 * (img[(pos_x - dx_minus) : (dx_plus + pos_x + 1), \
+###	              (pos_y - dy_minus) : (dy_plus + pos_y + 1)] == 255)
+###
+###	return r2.sum() / ((dx_plus + 1 + dx_minus) * (dy_plus + 1 + dy_minus))
+# 2}}}
 
 def max_ball(img, pos_x, pos_y):
 	r = 1
@@ -172,6 +444,88 @@ def max_ball(img, pos_x, pos_y):
 	return r - 1
 
 #1}}}
+
+### FUNCTIONS TO OPERATE OVER THE SAMPLE
+def get_pixel():
+	columns = range(2)
+	return np.loadtxt('sample.txt', delimiter=';', usecols=columns)
+
+def get_dist_pixel_border():
+	pixel_x =  np.loadtxt('sample.txt', delimiter=';', usecols=(0))
+	pixel_y =  np.loadtxt('sample.txt', delimiter=';', usecols=(1))
+
+	pixel_x = np.column_stack((pixel_x.flatten(), 70 - pixel_x.flatten()))
+	pixel_x = pixel_x.min(axis=1)
+
+	pixel_y = np.column_stack((pixel_y.flatten(), 175 - pixel_y.flatten()))
+	pixel_y = pixel_y.min(axis=1)
+
+	return np.column_stack((pixel_x, pixel_y))
+
+def dist_pixel_border(pixel_x, pixel_y):
+	dist_x = min([pixel_x, 70  - pixel_x])
+	dist_y = min([pixel_y, 175 - pixel_y])
+
+	return (dist_x, dist_y)
+
+def get_dist_pixel_center():
+	pixel_x =  np.loadtxt('sample.txt', delimiter=';', usecols=(0))
+	pixel_y =  np.loadtxt('sample.txt', delimiter=';', usecols=(1))
+
+	pixel_x = np.abs( 70/2 - pixel_x )
+	pixel_y = np.abs( 175/2 - pixel_y )
+
+	dist = np.sqrt(pixel_x**2 + pixel_y**2)
+
+	return dist[:, np.newaxis]
+
+def get_direction_vectors():
+	columns = range(2,10)
+	return np.loadtxt('sample.txt', delimiter=';', usecols=columns)
+
+def get_thickness_vectors():
+	columns = range(10,18)
+	return np.loadtxt('sample.txt', delimiter=';', usecols=columns)
+
+def get_max_direction_vector():
+	directions = get_direction_vectors() 
+
+	directions = directions.max(axis=1)
+	return directions[:, np.newaxis]
+
+def get_max_heavy_direction_vector():
+	directions = get_direction_vectors() * get_thickness_vectors()
+
+	directions = directions.max(axis=1)
+	return directions[:, np.newaxis]
+
+def get_max_ball():
+	max_ball =  np.loadtxt('sample.txt', delimiter=';', usecols=(18))
+	return max_ball[:, np.newaxis]
+
+def get_neighborhood():
+	columns = range(19,67)
+	return np.loadtxt('sample.txt', delimiter=';', usecols=columns)
+
+def get_neighborhood_mean():
+	neighborhood = get_neighborhood()
+	neighborhood_mean = neighborhood.mean(axis=1)
+	return neighborhood_mean[:, np.newaxis]
+
+def get_neighborhood_median():
+	neighborhood = get_neighborhood()
+	neighborhood_median = np.median(neighborhood, axis=1)
+	return neighborhood_median[:, np.newaxis]
+
+def get_neighborhood_std():
+	neighborhood = get_neighborhood()
+	neighborhood_std = neighborhood.std(axis=1)
+	return neighborhood_std[:, np.newaxis]
+
+def get_target():
+	return np.loadtxt('sample.txt', delimiter=';', usecols=(67))
+	
+
 
 if __name__ == '__main__':
 
@@ -280,23 +634,48 @@ if __name__ == '__main__':
 
 
 	# Loading the sample
-	sample = np.loadtxt('sample.txt', delimiter=';', usecols=range(13))
-	target = np.loadtxt('sample.txt', delimiter=';', usecols=13)
+	
+							 #get_max_direction_vector(),
+	sample = np.concatenate((get_dist_pixel_border(),
+							 get_direction_vectors() * get_thickness_vectors(),
+							 get_max_ball(),
+	                         get_neighborhood_mean()), axis=1)
+
+	target = get_target()
+
+	trainSample = sample[:-200,:]
+	trainTarget = target[:-200]
+
+	testSample = sample[-200:,:]
+	testTarget = target[-200:]
+
+	# Neural Network
+	#neuralModel = MLPClassifier(max_iter=1000, hidden_layer_sizes=(6,4))
+	#neuralModel.fit(trainSample, trainTarget)
+	#print('neural -> ', neuralModel.score(testSample, testTarget) )
+
 
 	
 	#sample = sample[:, (3,5,7,9, 11)]
 	# Adjusting the model
 
-	myModel = LogisticRegression(max_iter=500)
-	myModel.fit(sample[:800,:], target[:800])
+	myModel = LogisticRegression(max_iter=10000)
+	myModel.fit(trainSample, trainTarget)
 
 	#myModel2 = SVC(max_iter=-1)
-	#myModel2.fit(sample[:800,], target[:800])
-	#myModel2 = make_pipeline(StandardScaler(), SVC(kernel='poly', degree=2))
-	#myModel2.fit(sample[:800,:-3], target[:800])
+	##myModel2 = make_pipeline(StandardScaler(), SVC(kernel='linear', degree=3))
+	#myModel2.fit(trainSample, trainTarget)
 
-	print('logistic -> ', myModel.score(sample[800:,:], target[800:]) )
-	#print('SVM -> ', myModel2.score(sample[800:,:-3], target[800:]) )
+	#myModel3 = DecisionTreeClassifier(random_state=0)
+	#myModel3.fit(trainSample, trainTarget)
+
+	#myModel4 = RandomForestClassifier(random_state=0)
+	#myModel4.fit(trainSample, trainTarget)
+
+	print('logistic -> ', myModel.score(testSample, testTarget) )
+	#print('SVM -> ', myModel2.score(testSample, testTarget) )
+	#print('Tree -> ', myModel3.score(testSample, testTarget) )
+	#print('Random Forest -> ', myModel4.score(testSample, testTarget) )
 	#print(myModel2.coef_)
 
 	# Cleaning Images
@@ -317,25 +696,38 @@ if __name__ == '__main__':
 			for y in range(dy, img_array.shape[1] - dy):
 
 				if img_array[x,y] == 0:
+					pixel = np.array([x,y])
 
-					pixel_features = np.array( [[x,                            
-												y,                            
-												d0(img_array, x, y),          
-												d45(img_array, x, y),         
-												d90(img_array, x, y),         
-												d180(img_array, x, y),        
-												d225(img_array, x, y),        
-												d270(img_array, x, y),        
-												d315(img_array, x, y),        
-												max_ball(img_array, x, y),    
-												whites_rect0(img_array, x, y),
-												whites_rect1(img_array, x, y),
-												whites_rect2(img_array, x, y)]])
+					neighborhood = img_array[ (pixel[0] - dy_dx):(pixel[0] + dy_dx + 1),
+											  (pixel[1] - dy_dx):(pixel[1] + dy_dx + 1)]
+
+					neighborhood = neighborhood.flatten()
+					size_tmp = int(neighborhood.size / 2)
+					neighborhood = np.concatenate((neighborhood[:size_tmp],
+												   neighborhood[(size_tmp + 1):]))
+					neighborhood = 1 * (neighborhood[np.newaxis, :] == 0)
+
+
+					pixel_features = np.array([[
+								dist_pixel_border(x,y)[0],                            
+								dist_pixel_border(x,y)[1],                            
+								d0_direction  (img_array, pixel) *d0_thickness  (img_array, pixel),          
+								d45_direction (img_array, pixel) *d45_thickness (img_array, pixel),       
+								d90_direction (img_array, pixel) *d90_thickness (img_array, pixel),       
+								d135_direction(img_array, pixel) *d135_thickness(img_array, pixel),       
+								d180_direction(img_array, pixel) *d180_thickness(img_array, pixel),      
+								d225_direction(img_array, pixel) *d225_thickness(img_array, pixel),      
+								d270_direction(img_array, pixel) *d270_thickness(img_array, pixel),      
+								d315_direction(img_array, pixel) *d315_thickness(img_array, pixel),      
+								max_ball(img_array, pixel[0], pixel[1]),
+								neighborhood.mean()]])
+
+
 
 					prob = myModel.predict_proba(pixel_features)
-					if prob[0,0] >= 0.85:
+					if prob[0,0] > 0.9:
 						img_array2[x,y] = 255 
-						img_array[x,y]  = 255 
+						#img_array[x,y]  = 255 
 					#print( prob_not_a_word * K)
 
 
@@ -343,9 +735,40 @@ if __name__ == '__main__':
 
 		
 		img2 = Image.fromarray(np.uint8(img_array2), mode='L')
-		#img2 = img2.filter(ImageFilter.MedianFilter(3))
+		img2 = img2.filter(ImageFilter.MedianFilter(3))
 		#img_gray = img_gray.filter(ImageFilter.BoxBlur(3))
-		#img2 = img2.filter(ImageFilter.MaxFilter(3))
+		#img2 = img2.filter(ImageFilter.MinFilter(3))
 		img2.save('tmp.jpg')
 
 
+#pixel_features = np.array([[pixel[0],                            
+#            pixel[1],                            
+#			d0_direction  (img_array, pixel),          
+#			d45_direction (img_array, pixel),         
+#			d90_direction (img_array, pixel),         
+#			d135_direction(img_array, pixel),         
+#			d180_direction(img_array, pixel),        
+#			d225_direction(img_array, pixel),        
+#			d270_direction(img_array, pixel),        
+#			d315_direction(img_array, pixel),        
+#			d0_thickness  (img_array, pixel),          
+#			d45_thickness (img_array, pixel),         
+#			d90_thickness (img_array, pixel),         
+#			d135_thickness(img_array, pixel),         
+#			d180_thickness(img_array, pixel),        
+#			d225_thickness(img_array, pixel),        
+#			d270_thickness(img_array, pixel),        
+#			d315_thickness(img_array, pixel),        
+#			max_ball(img_array, pixel[0], pixel[1]) ]])
+
+#pixel_features = np.array( [[x,                            
+#							y,                            
+#							d0_direction  (img_array, pixel),          
+#							d45_direction (img_array, pixel),         
+#							d90_direction (img_array, pixel),         
+#							d135_direction(img_array, pixel),         
+#							d180_direction(img_array, pixel),        
+#							d225_direction(img_array, pixel),        
+#							d270_direction(img_array, pixel),        
+#							d315_direction(img_array, pixel),        
+#							max_ball(img_array, x, y)]])

@@ -845,7 +845,6 @@ if __name__ == "__main__":
 
 
 			# Taking the sample values
-			print(pixel)
 			sample = np.array([[pixel[0],                            
 			                    pixel[1],                            
 								d0_direction  (img_array, pixel),          
@@ -892,7 +891,7 @@ if __name__ == "__main__":
 			# Saving the sample
 
 			features_fmt = ['%d'] * 10 + ["%.2f"] * 8 + ["%d"] + ["%d"] * 49
-			print(sample)
+			#print(sample)
 			np.savetxt(sampleFile, 
 						sample, 
 						delimiter=';', 
