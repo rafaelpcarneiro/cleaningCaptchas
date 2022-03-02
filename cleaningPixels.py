@@ -283,65 +283,69 @@ if __name__ == '__main__':
 	sample = np.loadtxt('sample.txt', delimiter=';', usecols=range(13))
 	target = np.loadtxt('sample.txt', delimiter=';', usecols=13)
 
+	
+	#sample = sample[:, (3,5,7,9, 11)]
 	# Adjusting the model
 
-	myModel = make_pipeline(StandardScaler(), LogisticRegression(max_iter=500))
-	#myModel = LogisticRegression(max_iter=500)
-	myModel.fit(sample[:800,], target[:800])
+	myModel = LogisticRegression(max_iter=500)
+	myModel.fit(sample[:800,:], target[:800])
 
 	#myModel2 = SVC(max_iter=-1)
 	#myModel2.fit(sample[:800,], target[:800])
-	myModel2 = make_pipeline(StandardScaler(), SVC())
-	myModel2.fit(sample[:800,], target[:800])
+	#myModel2 = make_pipeline(StandardScaler(), SVC(kernel='poly', degree=2))
+	#myModel2.fit(sample[:800,:-3], target[:800])
 
-	print('logistic -> ', myModel.score(sample[800:,], target[800:]) )
-	print('SVM -> ', myModel2.score(sample[800:,], target[800:]) )
+	print('logistic -> ', myModel.score(sample[800:,:], target[800:]) )
+	#print('SVM -> ', myModel2.score(sample[800:,:-3], target[800:]) )
+	#print(myModel2.coef_)
 
 	# Cleaning Images
-	#for file in trainingSampleFiles:
-	#	time.sleep(1)
+	for file in trainingSampleFiles:
+		time.sleep(1)
 
-	#	# Opennig images
-	#	# gray image
-	#	img        = Image.open('data/' + file)
-	#	img        = img.convert('L')
-	#	#img        = img.filter(ImageFilter.BoxBlur(3))
-	#	img_array  = np.asarray(img) 
-	#	img_array  = makeImageBinary(img_array)
+		# Opennig images
+		# gray image
+		img        = Image.open('data/' + file)
+		img        = img.convert('L')
+		#img        = img.filter(ImageFilter.BoxBlur(3))
+		img_array  = np.asarray(img) 
+		img_array  = makeImageBinary(img_array)
 
-	#	img_array2 = img_array.copy()
+		img_array2 = img_array.copy()
 
-	#	for x in range(dx, img_array.shape[0] - dx):
-	#		for y in range(dy, img_array.shape[1] - dy):
+		for x in range(dx, img_array.shape[0] - dx):
+			for y in range(dy, img_array.shape[1] - dy):
 
-	#			if img_array[x,y] == 0:
-	#				pixel_features = np.array( [[x,                            
-	#											y,                            
-	#											d0(img_array, x, y),          
-	#											d45(img_array, x, y),         
-	#											d90(img_array, x, y),         
-	#											d180(img_array, x, y),        
-	#											d225(img_array, x, y),        
-	#											d270(img_array, x, y),        
-	#											d315(img_array, x, y),        
-	#											max_ball(img_array, x, y),    
-	#											whites_rect0(img_array, x, y),
-	#											whites_rect1(img_array, x, y),
-	#											whites_rect2(img_array, x, y)]])
+				if img_array[x,y] == 0:
 
-	#				#prob = myModel2.predict_proba(pixel_features)
-	#				#if prob[0,0] >= 0.6:
-	#				#	img_array2[x,y] = 255 
-	#				#print( prob_not_a_word * K)
+					pixel_features = np.array( [[x,                            
+												y,                            
+												d0(img_array, x, y),          
+												d45(img_array, x, y),         
+												d90(img_array, x, y),         
+												d180(img_array, x, y),        
+												d225(img_array, x, y),        
+												d270(img_array, x, y),        
+												d315(img_array, x, y),        
+												max_ball(img_array, x, y),    
+												whites_rect0(img_array, x, y),
+												whites_rect1(img_array, x, y),
+												whites_rect2(img_array, x, y)]])
+
+					prob = myModel.predict_proba(pixel_features)
+					if prob[0,0] >= 0.85:
+						img_array2[x,y] = 255 
+						img_array[x,y]  = 255 
+					#print( prob_not_a_word * K)
 
 
-	#	#print ('Image ' + file + ' --> DONE')
+		print ('Image ' + file + ' --> DONE')
 
-	#	
-	#	img2 = Image.fromarray(np.uint8(img_array2), mode='L')
-	#	#img2 = img2.filter(ImageFilter.MedianFilter(3))
-	#	#img_gray = img_gray.filter(ImageFilter.BoxBlur(3))
-	#	#img2 = img2.filter(ImageFilter.MaxFilter(3))
-	#	img2.save('tmp.jpg')
+		
+		img2 = Image.fromarray(np.uint8(img_array2), mode='L')
+		#img2 = img2.filter(ImageFilter.MedianFilter(3))
+		#img_gray = img_gray.filter(ImageFilter.BoxBlur(3))
+		#img2 = img2.filter(ImageFilter.MaxFilter(3))
+		img2.save('tmp.jpg')
 
 
