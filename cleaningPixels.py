@@ -118,23 +118,23 @@ if __name__ == '__main__':
 
 	# Loading parameters
 	pixel_is_part_of_word = \
-		np.loadtxt('parameters_9x9/pixel_is_a_word.txt', \
+		np.loadtxt('parameters/parameters_9x9/pixel_is_a_word.txt', \
 					delimiter=';')
 
 	neighborhood_given_word_param_x = \
-		np.loadtxt('parameters_9x9/neighborhood_given_word_param_x.txt', \
+		np.loadtxt('parameters/parameters_9x9/neighborhood_given_word_param_x.txt', \
 					delimiter=';')
 
 	neighborhood_given_word_param_total = \
-		np.loadtxt('parameters_9x9/neighborhood_given_word_param_total.txt', \
+		np.loadtxt('parameters/parameters_9x9/neighborhood_given_word_param_total.txt', \
 					delimiter=';')
 
 	neighborhood_given_not_word_param_x = \
-		np.loadtxt('parameters_9x9/neighborhood_given_not_word_param_x.txt', \
+		np.loadtxt('parameters/parameters_9x9/neighborhood_given_not_word_param_x.txt', \
 					delimiter=';')
 
 	neighborhood_given_not_word_param_total = \
-		np.loadtxt('parameters_9x9/neighborhood_given_not_word_param_total.txt', \
+		np.loadtxt('parameters/parameters_9x9/neighborhood_given_not_word_param_total.txt', \
 					delimiter=';')
 
 	# Cleaning Images
@@ -145,7 +145,7 @@ if __name__ == '__main__':
 		# gray image
 		img        = Image.open('data/' + file)
 		img        = img.convert('L')
-		#img        = img.filter(ImageFilter.BoxBlur(3))
+		#img        = img.filter(ImageFilter.MedianFilter(3))
 		img_array  = np.asarray(img) 
 		img_array  = makeImageBinary(img_array)
 
@@ -203,8 +203,8 @@ if __name__ == '__main__':
 					# Calculating the classifier for each pixel
 					K = 1 / (prob_is_a_word + prob_not_a_word)
 
-					#img_array2[x,y] = 255 if prob_not_a_word * K >= 0.98 else 0
-					img_array2[x,y] = 255 if prob_is_a_word * K <= 0.05 else 0
+					img_array2[x,y] = 255 if prob_not_a_word * K >= 0.99999 else 0
+					#img_array2[x,y] = 255 if prob_is_a_word * K <= 0.01 else 0
 					#print( prob_not_a_word * K)
 
 
