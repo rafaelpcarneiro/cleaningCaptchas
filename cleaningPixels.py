@@ -687,6 +687,7 @@ if __name__ == '__main__':
 		img        = Image.open('data/' + file)
 		img        = img.convert('L')
 		#img        = img.filter(ImageFilter.BoxBlur(3))
+		#img        = img.filter(ImageFilter.MedianFilter(3))
 		img_array  = np.asarray(img) 
 		img_array  = makeImageBinary(img_array)
 
@@ -725,7 +726,7 @@ if __name__ == '__main__':
 
 
 					prob = myModel.predict_proba(pixel_features)
-					if prob[0,0] > 0.9:
+					if prob[0,0] > 0.8:
 						img_array2[x,y] = 255 
 						#img_array[x,y]  = 255 
 					#print( prob_not_a_word * K)
@@ -735,7 +736,7 @@ if __name__ == '__main__':
 
 		
 		img2 = Image.fromarray(np.uint8(img_array2), mode='L')
-		img2 = img2.filter(ImageFilter.MedianFilter(3))
+		#img2 = img2.filter(ImageFilter.MedianFilter(3))
 		#img_gray = img_gray.filter(ImageFilter.BoxBlur(3))
 		#img2 = img2.filter(ImageFilter.MinFilter(3))
 		img2.save('tmp.jpg')
