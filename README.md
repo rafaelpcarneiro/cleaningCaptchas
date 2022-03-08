@@ -4,7 +4,7 @@
 Here my objective is to develop a program
 whose input is a captcha image, such as the 
 image 
-<p style="display:block;text-align:center;">
+<p style="display:block;text-align:center;witdh:100%;">
 <img style="text-align:center;"
      src="data/20220222182850.jpg" /> 
  </p>
