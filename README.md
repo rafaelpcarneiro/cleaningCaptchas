@@ -59,11 +59,12 @@ classifier as the real image.
 
 ## Future work
 I still need to
-* Implement an algorithm that split the cleaned
-captcha into 4 images containing possible letters
-* Finally, After spliting the image into 4 smaller
-images I need to implement an algorithm to classify
-the letters.
+* Implement an algorithm that splits the cleaned
+captchas - obtained previously - into 4 images where each one of them are
+containing possible letters
+* Finally, After spliting the images 
+ I need to implement an algorithm in order to classify
+ the letters of the splitted images
 
 So far I think that the segmentation problem is 
 going to be the more tedious...
