@@ -13,14 +13,13 @@ and whose pixels are visual components of letters.
 ## Results so far
 
 I have applied algorithms such as Naive Bayes,
-Logistic Regression and SVM to each pixel of a
-image. Such methods are on their respective 
+Logistic Regression and SVM to each pixel of an
+image to obtain the final version. Such methods are on their respective 
 branch.
 
-As an example, down below I have 
-two images, the original, and the version
-which the algorithm understand as the real
-image without noise, under a certain risk. Examples
+As an example, down below I have applied the SVM hypothesis class
+into a collection of images obtaining what is understod by the best
+classifier as the real image.
 
 1.
 <p align="center">
@@ -32,6 +31,30 @@ image without noise, under a certain risk. Examples
 <p align="center">
     <img src="data/20220222182933.jpg" /> 
     <img src="examples/20220222182933.jpg" /> 
+</p>
+
+3. 
+<p align="center">
+    <img src="data/20220222183002.jpg" /> 
+    <img src="examples/20220222183002.jpg" /> 
+</p>
+
+4. 
+<p align="center">
+    <img src="data/20220222184048.jpg" /> 
+    <img src="examples/20220222184048.jpg" /> 
+</p>
+
+5. 
+<p align="center">
+    <img src="data/20220222184703.jpg" /> 
+    <img src="examples/20220222184703.jpg" /> 
+</p>
+
+6. 
+<p align="center">
+    <img src="data/20220222185700.jpg" /> 
+    <img src="examples/20220222185700.jpg" /> 
 </p>
 
 ## Future work
