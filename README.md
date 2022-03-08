@@ -4,7 +4,7 @@
 Here my objective is to develop a program
 whose input is a captcha image, such as the 
 image 
-[](./data/20220222182850.jpg)
+![](./data/20220222182850.jpg)
 into a cleaner image, without noise and visual
 information related not directly with letters.
 
