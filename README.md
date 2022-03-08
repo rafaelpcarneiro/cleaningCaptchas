@@ -22,16 +22,16 @@ two images, the original, and the version
 which the algorithm understand as the real
 image without noise, under a certain risk:
 
-1. First example
+1. Example
 <p align="center">
     <img src="data/20220222182850.jpg" /> 
-    <img src="example/20220222182850.jpg" /> 
+    <img src="examples/20220222182850.jpg" /> 
 </p>
 
 2. Example
 <p align="center">
     <img src="data/20220222182933.jpg" /> 
-    <img src="example/20220222182933.jpg" /> 
+    <img src="examples/20220222182933.jpg" /> 
 </p>
 
 ## Future work
