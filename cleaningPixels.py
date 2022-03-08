@@ -676,8 +676,8 @@ if __name__ == '__main__':
 
 	print('logistic -> ', myModel.score(testSample, testTarget) )
 	print('SVM -> ', myModel2.score(testSample, testTarget) )
-	print('Tree -> ', myModel3.score(testSample, testTarget) )
-	print('Random Forest -> ', myModel4.score(testSample, testTarget) )
+	#print('Tree -> ', myModel3.score(testSample, testTarget) )
+	#print('Random Forest -> ', myModel4.score(testSample, testTarget) )
 	#print(myModel2.coef_)
 
 	# Cleaning Images
@@ -761,6 +761,7 @@ if __name__ == '__main__':
 		#img2 = img2.filter(ImageFilter.BoxBlur(3))
 		#img2 = img2.filter(ImageFilter.MinFilter(3))
 		img2.save('tmp.jpg')
+		img2.save('output/' + file)
 
 
 #pixel_features = np.array([[pixel[0],                            
