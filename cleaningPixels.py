@@ -34,7 +34,8 @@ d315 = np.array([ 1,  1])
 ### AUXILIARY FUNCTIONS
 #{{{1
 def makeImageBinary(img):
-	return 255 * (img >= 255/2)
+	#return 255 * (img >= 255/2)
+	return 255 * (img >= 200)
 
 def is_pixel_inside_img(img, pixel):
 	return ((0 <= pixel[0] < img.shape[0]) and (0 <= pixel[1] < img.shape[1]))
@@ -637,7 +638,8 @@ if __name__ == '__main__':
 	
 							 #get_max_direction_vector(),
 	sample = np.concatenate((get_dist_pixel_border(),
-							 get_direction_vectors() * get_thickness_vectors(),
+							 get_direction_vectors(),
+							 #get_thickness_vectors(),
 							 get_max_ball(),
 	                         get_neighborhood_mean()), axis=1)
 
@@ -662,20 +664,20 @@ if __name__ == '__main__':
 	myModel = LogisticRegression(max_iter=10000)
 	myModel.fit(trainSample, trainTarget)
 
-	#myModel2 = SVC(max_iter=-1)
-	##myModel2 = make_pipeline(StandardScaler(), SVC(kernel='linear', degree=3))
-	#myModel2.fit(trainSample, trainTarget)
+	#myModel2 = SVC(max_iter=-1, probability=True)
+	myModel2 = make_pipeline(StandardScaler(), SVC(kernel='poly', degree=3, probability=True))
+	myModel2.fit(trainSample, trainTarget)
 
-	#myModel3 = DecisionTreeClassifier(random_state=0)
-	#myModel3.fit(trainSample, trainTarget)
+	myModel3 = DecisionTreeClassifier(random_state=0)
+	myModel3.fit(trainSample, trainTarget)
 
-	#myModel4 = RandomForestClassifier(random_state=0)
-	#myModel4.fit(trainSample, trainTarget)
+	myModel4 = RandomForestClassifier(random_state=0)
+	myModel4.fit(trainSample, trainTarget)
 
 	print('logistic -> ', myModel.score(testSample, testTarget) )
-	#print('SVM -> ', myModel2.score(testSample, testTarget) )
-	#print('Tree -> ', myModel3.score(testSample, testTarget) )
-	#print('Random Forest -> ', myModel4.score(testSample, testTarget) )
+	print('SVM -> ', myModel2.score(testSample, testTarget) )
+	print('Tree -> ', myModel3.score(testSample, testTarget) )
+	print('Random Forest -> ', myModel4.score(testSample, testTarget) )
 	#print(myModel2.coef_)
 
 	# Cleaning Images
@@ -698,6 +700,11 @@ if __name__ == '__main__':
 
 				if img_array[x,y] == 0:
 					pixel = np.array([x,y])
+					
+					img_array2[   :dx,    :  ] = 255
+					img_array2[-dx:  ,    :  ] = 255
+					img_array2[  :   ,    :dy] = 255
+					img_array2[  :   , -dy:  ] = 255
 
 					neighborhood = img_array[ (pixel[0] - dy_dx):(pixel[0] + dy_dx + 1),
 											  (pixel[1] - dy_dx):(pixel[1] + dy_dx + 1)]
@@ -712,21 +719,35 @@ if __name__ == '__main__':
 					pixel_features = np.array([[
 								dist_pixel_border(x,y)[0],                            
 								dist_pixel_border(x,y)[1],                            
-								d0_direction  (img_array, pixel) *d0_thickness  (img_array, pixel),          
-								d45_direction (img_array, pixel) *d45_thickness (img_array, pixel),       
-								d90_direction (img_array, pixel) *d90_thickness (img_array, pixel),       
-								d135_direction(img_array, pixel) *d135_thickness(img_array, pixel),       
-								d180_direction(img_array, pixel) *d180_thickness(img_array, pixel),      
-								d225_direction(img_array, pixel) *d225_thickness(img_array, pixel),      
-								d270_direction(img_array, pixel) *d270_thickness(img_array, pixel),      
-								d315_direction(img_array, pixel) *d315_thickness(img_array, pixel),      
+								d0_direction  (img_array, pixel) ,          
+								d45_direction (img_array, pixel) ,       
+								d90_direction (img_array, pixel) ,       
+								d135_direction(img_array, pixel) ,       
+								d180_direction(img_array, pixel) ,      
+								d225_direction(img_array, pixel) ,      
+								d270_direction(img_array, pixel) ,      
+								d315_direction(img_array, pixel) ,      
 								max_ball(img_array, pixel[0], pixel[1]),
 								neighborhood.mean()]])
+					#pixel_features = np.array([[
+					#			dist_pixel_border(x,y)[0],                            
+					#			dist_pixel_border(x,y)[1],                            
+					#			d0_direction  (img_array, pixel) ,d0_thickness  (img_array, pixel),          
+					#			d45_direction (img_array, pixel) ,d45_thickness (img_array, pixel),       
+					#			d90_direction (img_array, pixel) ,d90_thickness (img_array, pixel),       
+					#			d135_direction(img_array, pixel) ,d135_thickness(img_array, pixel),       
+					#			d180_direction(img_array, pixel) ,d180_thickness(img_array, pixel),      
+					#			d225_direction(img_array, pixel) ,d225_thickness(img_array, pixel),      
+					#			d270_direction(img_array, pixel) ,d270_thickness(img_array, pixel),      
+					#			d315_direction(img_array, pixel) ,d315_thickness(img_array, pixel),      
+					#			max_ball(img_array, pixel[0], pixel[1]),
+					#			neighborhood.mean()]])
 
 
 
-					prob = myModel.predict_proba(pixel_features)
-					if prob[0,0] > 0.8:
+					#prob = myModel.predict_proba(pixel_features)[0,0]
+					if myModel.predict_proba(pixel_features)[0,0] >= 0.55:
+					#if myModel2.predict(pixel_features)[0] == 0:
 						img_array2[x,y] = 255 
 						#img_array[x,y]  = 255 
 					#print( prob_not_a_word * K)
@@ -737,7 +758,7 @@ if __name__ == '__main__':
 		
 		img2 = Image.fromarray(np.uint8(img_array2), mode='L')
 		#img2 = img2.filter(ImageFilter.MedianFilter(3))
-		#img_gray = img_gray.filter(ImageFilter.BoxBlur(3))
+		#img2 = img2.filter(ImageFilter.BoxBlur(3))
 		#img2 = img2.filter(ImageFilter.MinFilter(3))
 		img2.save('tmp.jpg')
 
