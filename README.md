@@ -4,10 +4,9 @@
 Here my objective is to develop a program
 whose input is a captcha image, such as the 
 image 
-<p style="display:block;text-align:center;width:100%;border:solid;">
-<img style="text-align:center;"
-     src="data/20220222182850.jpg" /> 
- </p>
+<p align="center">
+    <img src="data/20220222182850.jpg" /> 
+</p>
 into a cleaner image, without noise and visual
 information related not directly with letters.
 
